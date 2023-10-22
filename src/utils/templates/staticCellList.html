@@ -1,0 +1,34 @@
+<div id="cellList" class="w-fit h-min flex-col space-y-4">
+    <h1 class="w-min text-dark bg-light border-4 border-moon rounded-lg shadow-lg p-4">Static Cells</h1>
+    <div id="noteGrid" class="grid grid-cols-4 gap-2">
+        {% if !notebook_cells.is_empty() %}
+        {% for cell in notebook_cells %}
+        <form hx-post="/relay/find-static-cell" hx-target="#cellDetail" hx-swap="innerHTML" hx-trigger="click"
+            class="bg-light w-min p-2 border-2 border-moon">
+            <input id="{{ cell.event_id }}" class="w-12 truncate select-none bg-light border-0" name="event_id" value="{{ cell.event_id }}">
+            <input class="hidden" name="relay" value="wss://relay.roadrunner.lat">
+        </form>
+        <button onclick="addNoteToIndex('{{ cell.event_id }}')">Add</button>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+<script>
+
+var selectedEventIds = ["i"];
+
+function addNoteToIndex(event_id) {
+    var noteId = document.getElementById(event_id);
+    noteId.className = "bg-confirm w-12 truncate select-none border-0";
+
+    // Push the event_id value to the selectedEventIds array
+    selectedEventIds.push(noteId.value);
+    
+    // Update hidden input value with stringified array
+    document.getElementById("eventIdsInput").value = JSON.stringify(selectedEventIds);
+
+    // Log to console
+    console.log(selectedEventIds);
+}
+
+</script>

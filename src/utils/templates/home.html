@@ -1,0 +1,64 @@
+<div class="bg-dark p-4 md:p-8 h-full flex items-center justify-center gap-8">
+    <div class="flex flex-col p-4 text-center md:w-1/2 gap-4 md:gap-8 md:justify-center">
+        <h2 class="text-3xl font-bold sm:text-4xl text-light mb-4">
+            Welcome To The Arrakis Node
+        </h2>
+
+        <p class="text-moon">
+            Share your code tutorials, courses and demos to the Nostr
+            network.
+        </p>
+        <p class="text-moon">
+            Arrakis features interactive coding playgrounds with multiple
+            language support.
+        </p>
+        <p class="text-moon">
+            Not seeing the language or features you need? Contact us for
+            custom endpoints.
+        </p>
+
+        <div hx-get="/nav/demo" hx-target="#content">
+            <p class="w-full font-bold text-sm text-dark font-dune
+                    bg-spice justify-center content-center rounded 
+                    p-4 transition hover:bg-light focus:outline-none 
+                    focus:ring focus:ring-spice">
+                Try the demo now
+            </p>
+        </div>
+    </div>
+
+    <div class="flex grid grid-cols-2 items-center content-center gap-4">
+        <div hx-get="/nav/reader" hx-target="#content"
+            class="w-min h-min rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
+            <h2 class="mt-2 font-bold">Reader</h2>
+            <p class="hidden sm:mt-1 sm:block sm:text-sm sm:text-moon">
+                Find a notebook and run your code in the browser.
+            </p>
+        </div>
+
+        <div hx-get="/nav/creator" hx-target="#content"
+            class="w-min h-min rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
+            <h2 class="mt-2 font-bold">Creator</h2>
+            <p class="hidden sm:mt-1 sm:block sm:text-sm sm:text-moon">
+                Build a new notebook and share it to our relay.
+            </p>
+        </div>
+
+        <div hx-get="/nav/editor" hx-target="#content"
+            class="w-min h-min rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
+            <h2 class="mt-2 font-bold">Editor</h2>
+            <p class="hidden sm:mt-1 sm:block sm:text-sm sm:text-moon">
+                Manage your existing notebooks. Edit static content, or
+                update your code editors.
+            </p>
+        </div>
+
+        <div hx-get="/nav/hosting" hx-target="#content"
+            class="w-min h-min rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
+            <h2 class="mt-2 font-bold">Hosting</h2>
+            <p class="hidden sm:mt-1 sm:block sm:text-sm sm:text-moon">
+                Contact us for custom API and static web hosting.
+            </p>
+        </div>
+    </div>
+</div>

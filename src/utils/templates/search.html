@@ -1,0 +1,137 @@
+{% extends "layout.html" %} {% block title %}Arrakis - Search{% endblock %} {%
+block content %}
+
+<div class="text-moon">
+  <div id="search-form" class="bg-white">
+    <div class="z-[-10] fixed top-0 right-0 w-full h-2/3 md:h-full">
+      <img
+        alt="Pattern"
+        src="../styles/assets/images/arrakis-bg.png"
+        class="absolute inset-0 h-full w-full object-cover opacity-25 sm:rounded-lg"
+      />
+    </div>
+
+    <main
+      class="flex items-center justify-center px-8 py-8 md:p-4 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6"
+    >
+      <div class="max-w-xl lg:max-w-3xl">
+        <h1 class="mt-6 text-2xl font-bold text-desert sm:text-3xl md:text-4xl">
+          Arrakis Notes - Search
+        </h1>
+
+        <p class="mt-4 leading-relaxed text-moon">
+          Find your Arrakis Notes by searching for the pubkey of the notebook.
+          Filter through available notebooks on the relay by searching through
+          author pubkeys. You can also find individual notes by their ids.
+        </p>
+
+        <form
+          hx-boost="true"
+          action="/relay/notebook"
+          method="post"
+          class="mt-8 grid grid-cols-6 gap-6"
+        >
+          <div class="relative col-span-6 sm:col-span-3">
+            <label for="notebook_pubkey" class="sr-only">
+              Notebook Pubkey
+            </label>
+            <input
+              type="text"
+              id="notebook_pubkey"
+              name="notebook_pubkey"
+              placeholder="Author"
+              class="w-full bg-dark rounded-md border-moon py-2.5 pe-10 shadow-sm sm:text-sm"
+            />
+            <span
+              class="absolute inset-y-0 end-0 grid w-10 place-content-center"
+            >
+              <span class="sr-only">Notebook Pubkey</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="h-4 w-4"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                />
+              </svg>
+            </span>
+          </div>
+          <div class="relative col-span-6 sm:col-span-3">
+            <label for="author_pubkey" class="sr-only"> Author Pubkey </label>
+            <input
+              type="text"
+              id="author_pubkey"
+              name="author_pubkey"
+              placeholder="Author"
+              class="w-full bg-dark rounded-md border-moon py-2.5 pe-10 shadow-sm sm:text-sm"
+            />
+            <span
+              class="absolute inset-y-0 end-0 grid w-10 place-content-center"
+            >
+              <span class="sr-only">Author</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="h-4 w-4"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                />
+              </svg>
+            </span>
+          </div>
+          <div class="relative col-span-6">
+            <label for="event_id" class="sr-only"> Event ID </label>
+            <input
+              type="text"
+              id="event_id"
+              name="event_id"
+              placeholder="Event ID"
+              class="w-full bg-dark rounded-md border-moon py-2.5 pe-10 shadow-sm sm:text-sm"
+            />
+            <span
+              class="absolute inset-y-0 end-0 grid w-10 place-content-center"
+            >
+              <span class="sr-only">Event ID</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="h-4 w-4"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                />
+              </svg>
+            </span>
+          </div>
+          <div class="col-span-6 sm:flex sm:items-center sm:gap-4">
+            <button
+              type="submit"
+              class="mt-8 inline-block rounded bg-spice px-12 py-3 text-sm text-dark font-bold transition hover:bg-light focus:outline-none focus:ring focus:ring-spice"
+            >
+              Find Arrakis Notes
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="notebook"></div>
+{% endblock %}

@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Birdman";
+  src: url("./assets/fonts/BIRDB___.ttf");
+}
+
+@font-face {
+  font-family: "Sanset";
+  src: url("./assets/fonts/sanset.otf");
+}
+
+@font-face {
+  font-family: "Dune";
+  src: url("./assets/fonts/Dune_Rise.otf");
+}
+
+@font-face {
+  font-family: "Cascadia";
+  src: url("./assets/fonts/cascade.otf");
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+button {
+  @apply font-dune font-bold tracking-wide;
+}
+
+p,
+span,
+a,
+label {
+  @apply font-cascade text-base tracking-wide;
+}
+
+input {
+  @apply font-cascade text-base tracking-wide;
+}

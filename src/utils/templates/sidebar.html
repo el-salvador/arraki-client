@@ -1,0 +1,50 @@
+<!-- navigation rail -->
+<!-- list menu -->
+<div
+    class="flex flex-col items-center justify-between w-16 h-screen px-2 py-4  bg-spice">
+    <div></div>
+    <a href="/" class="group active w-1/4 md:w-auto flex flex-col items-center justify-center px-0 gap-1">
+        <div
+            class="relative w-14 h-8 hover-icon group-hover:bg-moon dark:group-hover:bg-light group-hover:bg-opacity-80 dark:group-hover:bg-opacity-80 flex items-center justify-center rounded-2xl">
+            <span class="material-symbols-outlined">widgets</span>
+        </div>
+        <p class="hidden md:block text-xs text-dark tracking-[.0416em] leading-tight">
+            Home
+        </p>
+    </a>
+
+    <button onclick="getPublicKey()" class="group w-1/4 md:w-auto flex flex-col items-center justify-center px-0 gap-1">
+        <div
+            class="relative w-14 h-8 hover-icon group-hover:bg-moon dark:group-hover:bg-light group-hover:bg-opacity-80 dark:group-hover:bg-opacity-80 flex items-center justify-center rounded-2xl">
+            <span class="material-symbols-outlined">account_circle</span>
+        </div>
+        <p class="hidden md:block text-xs text-dark tracking-[.0416em] leading-tight">
+            Profile
+        </p>
+    </button>
+    <script>
+        async function getPublicKey() {
+            try {
+                const key = await window.nostr.getPublicKey();
+                console.log(key); // or do something with the key
+            } catch (error) {
+                console.error("Error fetching public key:", error);
+            }
+        }
+    </script>
+    <a href="/about" class="group w-1/4 md:w-auto flex flex-col items-center justify-center px-0 gap-1">
+        <div
+            class="relative w-14 h-8 hover-icon group-hover:bg-moon dark:group-hover:bg-light group-hover:bg-opacity-80 dark:group-hover:bg-opacity-80 flex items-center justify-center rounded-2xl">
+            <span class="material-symbols-outlined">book</span>
+        </div>
+        <p class="hidden md:block text-xs text-dark tracking-[.0416em] leading-tight">
+            About
+        </p>
+    </a>
+    <div>
+        <div class="hidden md:flex flex-col items-center gap-3 mt-auto">
+            <div class="relative" aria-label="Brightness" data-microtip-position="top" role="tooltip"></div>
+        </div>
+    </div>
+</div>
+<!-- space for a button -->

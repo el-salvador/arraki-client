@@ -1,0 +1,88 @@
+<div id="noteGrid" class="bg-dark h-full w-full p-12 flex flex-wrap gap-12">
+    <div class="float-left grid grid-cols-2 h-fit w-1/3 rounded-lg border-4 border-moon p-1">
+        <div class="col-span-2 h-96">
+            <div id="writer-monaco" name="user_code_input" style="width: 100%; height: 100%"></div>
+        </div>
+        <form hx-post="/relay/post-static-cell" hx-target="#didSend" hx-swap="outerHTML">
+            <input class="hidden" name="relay" value="wss://relay.roadrunner.lat">
+            </input>
+            <textarea class="hidden" id="markdown_input" name="markdown">
+            </textarea>
+            <button class="h-full w-full bg-confirm hover:bg-light hover:text-dark border border-4 border-moon">
+                Post
+            </button>
+        </form>
+        <button onclick={clearMonacoEditor()}
+            class="h-full w-full p-2 bg-error hover:bg-light hover:text-dark border border-4 border-moon" type="button">
+            Clear
+        </button>
+    </div>
+    <button class="col-span-1 h-min w-min bg-light border-4 border-moon rounded-lg shadow-lg p-4"
+        hx-get="/relay/get-static-cells" hx-target="#cellList" hx-swap="outerHTML">Refresh</button>
+    <div id="cellList" class="transition-all"></div>
+    <div id="cellDetail" class="h-min w-min flex flex-col bg-light border-4 border-moon rounded-lg shadow-lg p-4"></div>
+    <div class="h-min w-min flex flex-col bg-light border-4 border-moon rounded-lg shadow-lg p-4">
+        <h2>Index List</h2>
+        <form hx-post="/relay/post-index" hx-target="#didSend" hx-swap="outerHTML"
+            id="indexCellList">
+            <input class="hidden" name="relay" value="wss://relay.roadrunner.lat" />
+            <input class="hidden" id="eventIdsInput" name="event_ids" />
+            <button>Post Index</button>
+        </form>
+    </div>
+</div>
+<div id="didSend"></div>
+<script>
+    var editor = monaco.editor.create(
+        document.getElementById("writer-monaco"),
+        {
+            value: [
+                "# This is a heading",
+                "## This is a sub-heading",
+                "",
+                "Regular text is just written and can be **bold** or *italic*.",
+                "",
+                "You can create lists:",
+                "- Item 1",
+                "- Item 2",
+                "  - Sub-item 1",
+                "  - Sub-item 2",
+                "",
+                "Here's a link: [Google](https://www.google.com)",
+                "",
+                "Code can be `inline` or as a block:",
+                "",
+                "```javascript",
+                'console.log("This is a code block");',
+                "```",
+                "",
+                "> This is a blockquote.",
+                "",
+                "---",
+                "",
+                "That's a horizontal rule above!",
+            ].join("\n"),
+
+            language: "markdown",
+            theme: "vs-dark",
+            minimap: {
+                enabled: false,
+            },
+            lineNumbersMinChars: 1,
+        },
+    );
+
+    function clearMonacoEditor() {
+        editor.setValue("");
+    }
+    function updateTextareaContent() {
+        const textarea = document.getElementById("markdown_input");
+        textarea.value = editor.getValue();
+    }
+
+    // Call it once initially to ensure the textarea has the initial content
+    // Attach the function to Monaco Editor's change event
+    editor.onDidChangeModelContent(updateTextareaContent);
+    updateTextareaContent();
+
+</script>
