@@ -4,7 +4,7 @@ use tower_http::services::ServeDir;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use utils::html::{code_execution, creator, editor, homepage, notebook, reader, post_static_cell, find_static_cells, find_static_cell_detail, post_notebook_index};
+use utils::html::{code_execution, creator, editor, homepage, reader, post_static_cell, find_static_cells, find_static_cell_detail, post_notebook_index, notebook_from_pubkey};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -21,16 +21,17 @@ async fn main() -> anyhow::Result<()> {
     // includes monaco editor and styles
     let src_path = std::env::current_dir().unwrap();
 
-    // Microservice for static content
     let pages_router = Router::new()
         .route("/reader", routing::get(reader))
         .route("/creator", routing::get(creator))
         .route("/editor", routing::get(editor))
         .route("/hosting", routing::get(homepage));
 
-    // Microservices to interact with relays
+    let user_router = Router::new()
+        .route("/getNewKeys", routing::get(find_static_cells));
+
     let api_router = Router::new()
-        .route("/notebook", routing::post(notebook))
+        .route("/notebook", routing::post(notebook_from_pubkey))
         .route("/notebookIndex", routing::post(post_notebook_index))
         .route("/execute", routing::post(code_execution))
         .route("/post-static-cell", routing::post(post_static_cell))
@@ -43,6 +44,7 @@ async fn main() -> anyhow::Result<()> {
     let router = Router::new()
         .route("/", routing::get(homepage))
         .nest("/nav", pages_router)
+        .nest("/user", user_router)
         .nest("/relay", api_router)
         .route("/about", routing::get(homepage))
         .nest_service(
@@ -62,5 +64,6 @@ async fn main() -> anyhow::Result<()> {
         .await
         .context("Waiting...")
         .expect("Server failed");
+
     Ok(())
 }

@@ -7,12 +7,12 @@
                 <button class="bg-spice p-4 rounded-2xl w-fit flex flex-col gap-4 text-left 
                     hover:bg-light hover:text-dark transition" onclick="setNoteData(event)">
                     <div class="remove-all break-all flex flex-col">
-                        {{ cell.markdown.clone()|markdown }}
+                        {{ cell.get_markdown_content()|markdown }}
                     </div>
-                    <p>Posted on: {{ cell.get_timestamp_from_unix() }}</p>
+                    <p>Posted on: {{ cell.get_cell_timestamp() }}</p>
 
-                    <input class="hidden" data-author="author" value{{ cell.author }}></input>
-                    <input class="hidden" data-id="id" value={{ cell.event_id }}></input>
+                    <input class="hidden" data-author="author" value{{ cell.get_notebook_pubkey()}}></input>
+                    <input class="hidden" data-id="id" value={{ cell.get_cell_id()}}></input>
                 </button>
                 <div id="execution_response"></div>
                 {% endfor %}

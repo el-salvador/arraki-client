@@ -1,7 +1,4 @@
-use crate::nostr::{
-    find_demo_notebook, find_notebook_by_pubkey, post_code_and_wait_for_execution,
-    post_notebook_cell, NotebookCells, Notebook,
-};
+use crate::nostr::{post_code_and_wait_for_execution, Notebook, NotebookCells};
 use askama::Template;
 use axum::{
     debug_handler,
@@ -47,15 +44,41 @@ pub async fn reader() -> impl IntoResponse {
 
 #[derive(Template)]
 #[template(path = "notebook.html")]
-struct NotebookTemplate {
-    notebook_cells: Vec<StaticCellResponse>,
+pub struct NotebookTemplate {
+    notebook_cells: Vec<NotebookCells>,
 }
 
-#[derive(serde::Deserialize, Debug)]
-pub struct NotebookSearchForm {
-    pub notebook_pubkey: String,
-    pub author_pubkey: String,
-    pub event_id: String,
+#[derive(Template)]
+#[template(path = "code-response.html")]
+pub struct ExecutionResponseTemplate {
+    code_execution: CodeExecutions,
+}
+
+pub struct CodeExecutions {
+    _input: String,
+    response: String,
+    _success: bool,
+}
+
+#[derive(Template)]
+#[template(path = "post-notebook.html")]
+pub struct PostNotebookTemplate {
+    posted: bool,
+}
+
+#[derive(Template)]
+#[template(path = "staticCellDetail.html")]
+pub struct StaticCellDetailTemplate {
+    markdown: String,
+    timestamp: u64,
+    author: String,
+    event_id: String,
+}
+
+#[derive(Template)]
+#[template(path = "staticCellList.html")]
+pub struct StaticCellListTemplate {
+    notebook_cells: Vec<StaticCellResponse>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -72,17 +95,11 @@ impl StaticCellResponse {
         dt.to_rfc2822()
     }
 }
-
-#[derive(Deserialize, Debug)]
-pub struct NotebookResponse {
-    pub notebook_cells: Vec<StaticCellResponse>,
-}
-
-pub async fn notebook(response: Form<NotebookSearchForm>) -> impl IntoResponse {
-    info!("Client wants: {}", &response.notebook_pubkey);
-    match find_notebook_by_pubkey(&response.notebook_pubkey).await {
-        Some(raw_cells) => {
-            let notebook_cells: Vec<StaticCellResponse> = raw_cells
+pub async fn find_static_cells() -> impl IntoResponse {
+    info!("Client wants to get static cells");
+    match NotebookCells::find_static_cells("wss://relay.roadrunner.lat").await {
+        Ok(cells) => {
+            let notebook_cells: Vec<StaticCellResponse> = cells
                 .iter()
                 .map(|cell| {
                     let markdown = cell.get_content().to_string();
@@ -97,9 +114,35 @@ pub async fn notebook(response: Form<NotebookSearchForm>) -> impl IntoResponse {
                     }
                 })
                 .collect::<Vec<StaticCellResponse>>();
-
-            HtmlTemplate(NotebookTemplate { notebook_cells })
+            HtmlTemplate(StaticCellListTemplate { notebook_cells })
         }
+        Err(_) => HtmlTemplate(StaticCellListTemplate {
+            notebook_cells: vec![],
+        }),
+    }
+}
+
+#[derive(serde::Deserialize, Debug)]
+pub struct NotebookSearchRequest {
+    pub notebook_pubkey: String,
+    pub relay: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct NotebookSearchResponse {
+    pub notebook_cells: Vec<NotebookCells>,
+}
+
+pub async fn notebook_from_pubkey(form: Form<NotebookSearchRequest>) -> impl IntoResponse {
+    match Notebook::find_notebook(
+        &form.relay,
+        &form.notebook_pubkey, 
+    )
+    .await
+    {
+        Some(notebook) => HtmlTemplate(NotebookTemplate {
+            notebook_cells: notebook.get_notebook_cells(),
+        }),
         None => {
             info!("No notebook found.");
             HtmlTemplate(NotebookTemplate {
@@ -115,23 +158,11 @@ pub struct IndexPostRequest {
 }
 
 pub async fn post_notebook_index(response: Json<IndexPostRequest>) -> impl IntoResponse {
-    let index = serde_json::from_str( &response.index.to_owned()).unwrap();
+    let index = serde_json::from_str(&response.index.to_owned()).unwrap();
     match Notebook::post_index_note(index, "wss://relay.roadrunner.lat").await {
         Ok(_) => HtmlTemplate(PostNotebookTemplate { posted: true }),
         Err(_) => HtmlTemplate(PostNotebookTemplate { posted: false }),
     }
-}
-
-#[derive(Template)]
-#[template(path = "code-response.html")]
-struct ExecutionResponseTemplate {
-    code_execution: CodeExecutions,
-}
-
-struct CodeExecutions {
-    input: String,
-    response: String,
-    _success: bool,
 }
 
 #[derive(serde::Deserialize, Debug)]
@@ -143,33 +174,26 @@ pub struct UserCodeInput {
 
 pub async fn code_execution(user_code_input: Form<UserCodeInput>) -> impl IntoResponse {
     info!("Client wants to run: {:?}", &user_code_input);
-    let input = user_code_input.code_string.to_owned();
-    if let Some(response) = post_code_and_wait_for_execution(&input).await {
+    let _input = user_code_input.code_string.to_owned();
+    if let Some(response) = post_code_and_wait_for_execution(&_input).await {
         let _success = true;
         let code_execution = CodeExecutions {
-            input,
+            _input,
             response: response.get_content().to_string(),
             _success,
         };
         HtmlTemplate(ExecutionResponseTemplate { code_execution })
     } else {
-        let response = format!("We ran this code: {} and failed", input);
+        let response = format!("We ran this code: {} and failed", _input);
         let _success = false;
         let code_execution = CodeExecutions {
-            input,
+            _input,
             response,
             _success,
         };
         HtmlTemplate(ExecutionResponseTemplate { code_execution })
     }
 }
-
-#[derive(Template)]
-#[template(path = "post-notebook.html")]
-pub struct PostNotebookTemplate {
-    posted: bool,
-}
-
 #[derive(Deserialize, Debug)]
 pub struct StaticCellPost {
     pub markdown: String,
@@ -186,16 +210,6 @@ pub async fn post_static_cell(Form(static_cell_post): Form<StaticCellPost>) -> i
         Err(_) => HtmlTemplate(PostNotebookTemplate { posted: false }),
     }
 }
-
-#[derive(Template)]
-#[template(path = "staticCellDetail.html")]
-pub struct StaticCellDetailTemplate {
-    markdown: String,
-    timestamp: u64,
-    author: String,
-    event_id: String,
-}
-
 #[derive(Deserialize, Debug)]
 pub struct CellDetailPost {
     pub event_id: String,
@@ -235,40 +249,6 @@ pub async fn find_static_cell_detail(
         }),
     }
 }
-
-#[derive(Template)]
-#[template(path = "staticCellList.html")]
-pub struct StaticCellListTemplate {
-    notebook_cells: Vec<StaticCellResponse>,
-}
-
-pub async fn find_static_cells() -> impl IntoResponse {
-    info!("Client wants to get static cells");
-    match NotebookCells::find_static_cells("wss://relay.roadrunner.lat").await {
-        Ok(cells) => {
-            let notebook_cells: Vec<StaticCellResponse> = cells
-                .iter()
-                .map(|cell| {
-                    let markdown = cell.get_content().to_string();
-                    let timestamp = cell.get_created_at();
-                    let author = cell.get_pubkey().to_string();
-                    let event_id = cell.get_id().to_string();
-                    StaticCellResponse {
-                        markdown,
-                        timestamp,
-                        author,
-                        event_id,
-                    }
-                })
-                .collect::<Vec<StaticCellResponse>>();
-            HtmlTemplate(StaticCellListTemplate { notebook_cells })
-        }
-        Err(_) => HtmlTemplate(StaticCellListTemplate {
-            notebook_cells: vec![],
-        }),
-    }
-}
-
 pub struct HtmlTemplate<T>(T);
 impl<T> IntoResponse for HtmlTemplate<T>
 where

@@ -5,18 +5,45 @@ use nostro2::{
 };
 use serde_json::{json, to_string_pretty, Value};
 use tracing::log::info;
+use serde::Deserialize;
 
 pub struct Notebook {
     index: SignedNote,
     cells: Vec<NotebookCells>,
 }
-
+#[derive(Debug, Deserialize)]
 pub enum NotebookCells {
     Static(SignedNote),
     Active(SignedNote),
 }
 
 impl NotebookCells {
+
+    pub fn get_markdown_content(&self) -> String {
+        match self {
+            Self::Static(note) => note.get_content().to_string(),
+            Self::Active(note) => note.get_content().to_string(),
+        }
+    }
+    pub fn get_cell_id(&self) -> String {
+        match self {
+            Self::Static(note) => note.get_id().to_string(),
+            Self::Active(note) => note.get_id().to_string(),
+        }
+    }
+    pub fn get_notebook_pubkey(&self) -> String {
+        match self {
+            Self::Static(note) => note.get_pubkey().to_string(),
+            Self::Active(note) => note.get_pubkey().to_string(),
+        }
+    }
+    pub fn get_cell_timestamp(&self) -> String {
+        match self {
+            Self::Static(note) => note.get_created_at().to_string(),
+            Self::Active(note) => note.get_created_at().to_string(),
+        }
+    }
+
     pub async fn create_static_cell(markdown: &str, relay: &str) -> Result<(), RelayErrors> {
         if let Ok(my_nostr_user) = nostro2::userkeys::UserKeys::new(MY_KEY) {
             let note = Note::new(my_nostr_user.get_public_key(), 401, markdown);
@@ -76,12 +103,6 @@ impl NotebookCells {
             Err(RelayErrors::SubscriptionError(
                 "Error creating user keys".to_string(),
             ))
-        }
-    }
-    pub fn extract_id(&self) -> String {
-        match self {
-            Self::Static(note) => note.get_id().to_string(),
-            Self::Active(note) => note.get_id().to_string(),
         }
     }
 
@@ -183,6 +204,11 @@ impl NotebookCells {
 }
 
 impl Notebook {
+
+    pub fn get_notebook_cells(self) -> Vec<NotebookCells> {
+        self.cells
+    }
+
     pub async fn find_notebook(relay: &str, notebook: &str) -> Option<Self> {
         if let Some(index) = Self::find_notebook_index(relay, notebook).await {
             if let Ok(cells) = Self::find_notebook_cells(&index, relay).await {
@@ -343,87 +369,6 @@ impl Notebook {
                 }
             },
         }
-    }
-}
-
-pub async fn find_demo_notebook() -> Option<Vec<SignedNote>> {
-    let mut notebook_cells: Vec<SignedNote> = vec![];
-    let relay_connection = NostrRelay::new("wss://relay.roadrunner.lat")
-        .await
-        .expect("Error");
-    let filter: Value = json!({
-        "kinds": [401],
-    });
-
-    relay_connection.subscribe(filter).await.unwrap();
-
-    while let Some(Ok(relay_message)) = relay_connection.read_from_relay().await {
-        match relay_message {
-            RelayEvents::EVENT(_event, _id, signed_note) => {
-                info!("Found notebook cell");
-                notebook_cells.push(signed_note);
-            }
-            RelayEvents::EOSE(_event, notice) => {
-                info!("End of search: {}", notice);
-                relay_connection.close().await.unwrap();
-                break;
-            }
-            RelayEvents::OK(_event, id, _success, _notice) => {
-                info!("OK: {}", id);
-            }
-            RelayEvents::NOTICE(_event, notice) => {
-                info!("Notice: {}", notice);
-            }
-        };
-    }
-    // After the while loop completes
-    if notebook_cells.is_empty() {
-        info!("No notebook cells found");
-        return None;
-    } else {
-        info!("Found notebook {:?} cells", notebook_cells.len());
-        return Some(notebook_cells);
-    }
-}
-
-pub async fn find_notebook_by_pubkey(notebook: &str) -> Option<Vec<SignedNote>> {
-    info!("Looking for: {}", notebook);
-
-    let mut notebook_cells: Vec<SignedNote> = vec![];
-    let relay_connection = NostrRelay::new("wss://relay.roadrunner.lat")
-        .await
-        .expect("Error");
-    let filter: Value = json!({
-        "kinds": [7420],
-        "limit": 25,
-    });
-
-    relay_connection.subscribe(filter).await.unwrap();
-
-    while let Some(Ok(relay_message)) = relay_connection.read_from_relay().await {
-        match relay_message {
-            RelayEvents::EVENT(_event, _id, signed_note) => {
-                notebook_cells.push(signed_note);
-            }
-            RelayEvents::EOSE(_event, notice) => {
-                info!("End of search: {}", notice);
-                break;
-            }
-            RelayEvents::OK(_event, id, _success, _notice) => {
-                info!("OK: {}", id);
-            }
-            RelayEvents::NOTICE(_event, notice) => {
-                info!("Notice: {}", notice);
-            }
-        }
-    }
-    // After the while loop completes
-    if notebook_cells.is_empty() {
-        info!("No notebook cells found");
-        return None;
-    } else {
-        info!("Found notebook {:?} cells", notebook_cells.len());
-        return Some(notebook_cells);
     }
 }
 
