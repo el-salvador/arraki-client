@@ -4,7 +4,7 @@ use tower_http::services::ServeDir;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use utils::html::{code_execution, creator, editor, homepage, reader, post_static_cell, find_static_cells, find_static_cell_detail, post_notebook_index, notebook_from_pubkey};
+use utils::html::{code_execution, creator, editor, homepage, reader, post_static_cell, find_static_cells, find_static_cell_detail, post_notebook_index, notebook_from_pubkey, get_user_keypair};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -28,7 +28,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/hosting", routing::get(homepage));
 
     let user_router = Router::new()
-        .route("/getNewKeys", routing::get(find_static_cells));
+        .route("/userKeys", routing::get(get_user_keypair));
 
     let api_router = Router::new()
         .route("/notebook", routing::post(notebook_from_pubkey))

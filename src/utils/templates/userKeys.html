@@ -1,0 +1,12 @@
+<div hx-get="/user/userKeys" hx-trigger="click" hx-swap="outerHTML">
+    <h2>Your Keypair</h2>
+    <p>You were assigned a keypair on entry. You can use this keypair to sign Nostr messages.</p>
+    <p>Your public key is: <span id="publicKey">{{ public_key[..12] }}</span></p>
+    <p>Your private key was saved to the DOM.</p>
+    <P>Click this box for a new keypair.</p>
+</div>
+
+<script>
+    var privateKey = '{{ private_key }}'; // Replace with your templating syntax
+</script>
+

@@ -7,6 +7,7 @@ use axum::{
     Form, Json,
 };
 use chrono::TimeZone;
+use nostro2::userkeys::UserKeys;
 use serde::Deserialize;
 use tracing::log::info;
 
@@ -194,6 +195,7 @@ pub async fn code_execution(user_code_input: Form<UserCodeInput>) -> impl IntoRe
         HtmlTemplate(ExecutionResponseTemplate { code_execution })
     }
 }
+
 #[derive(Deserialize, Debug)]
 pub struct StaticCellPost {
     pub markdown: String,
@@ -249,6 +251,38 @@ pub async fn find_static_cell_detail(
         }),
     }
 }
+
+#[derive(Template)]
+#[template(path = "userKeys.html")]
+pub struct UserKeysTemplate {
+    private_key: String,
+    public_key: String,
+}
+
+fn generate_random_hex_string() -> String {
+    let mut byte_vector = vec![0u8; 32];
+    byte_vector.iter_mut().for_each(|byte| {
+        *byte = rand::random::<u8>();
+    });
+    hex::encode(byte_vector)
+}
+
+pub async fn get_user_keypair() -> impl IntoResponse {
+    let random_hex_string = generate_random_hex_string(); 
+    info!("Client wants to get user keypair for: {:?}", &random_hex_string);
+    match UserKeys::new(&random_hex_string) {
+        Ok(user_keys) => HtmlTemplate(UserKeysTemplate {
+            private_key: random_hex_string.to_string(),
+            public_key: user_keys.get_public_key().to_string(),
+        }),
+        Err(_) => HtmlTemplate(UserKeysTemplate{
+            private_key: "No private key found".to_string(),
+            public_key: "No public key found".to_string(),
+        }),
+    }
+}
+
+        
 pub struct HtmlTemplate<T>(T);
 impl<T> IntoResponse for HtmlTemplate<T>
 where

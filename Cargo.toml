@@ -19,6 +19,7 @@ askama = { version = "0.12.0", features = ["markdown"] }
 axum = { version = "0.6.20", features = ["macros"] }
 chrono = "0.4.29"
 futures = "0.3.28"
+hex = "0.4.3"
 nostro2 = "0.1.7"
 pulldown-cmark = "0.9.3"
 serde = "1.0.188"
@@ -29,4 +30,4 @@ tower-http = { version = "0.4.4", features = ["fs"] }
 tracing = {version = "0.1.37", features = ["log"] }
 tracing-subscriber = {version = "0.3.17", features = ["env-filter"] }
 tungstenite = "0.20.0"
-
+rand = "0.8.5"
