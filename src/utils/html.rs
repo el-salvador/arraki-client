@@ -1,13 +1,13 @@
 use crate::nostr::{
     find_demo_notebook, find_notebook_by_pubkey, post_code_and_wait_for_execution,
-    post_notebook_cell, NotebookCells,
+    post_notebook_cell, NotebookCells, Notebook,
 };
 use askama::Template;
 use axum::{
     debug_handler,
     http::StatusCode,
     response::{Html, IntoResponse, Response},
-    Form,
+    Form, Json,
 };
 use chrono::TimeZone;
 use serde::Deserialize;
@@ -109,6 +109,19 @@ pub async fn notebook(response: Form<NotebookSearchForm>) -> impl IntoResponse {
     }
 }
 
+#[derive(Deserialize, Debug)]
+pub struct IndexPostRequest {
+    pub index: String,
+}
+
+pub async fn post_notebook_index(response: Json<IndexPostRequest>) -> impl IntoResponse {
+    let index = serde_json::from_str( &response.index.to_owned()).unwrap();
+    match Notebook::post_index_note(index, "wss://relay.roadrunner.lat").await {
+        Ok(_) => HtmlTemplate(PostNotebookTemplate { posted: true }),
+        Err(_) => HtmlTemplate(PostNotebookTemplate { posted: false }),
+    }
+}
+
 #[derive(Template)]
 #[template(path = "code-response.html")]
 struct ExecutionResponseTemplate {
@@ -127,6 +140,7 @@ pub struct UserCodeInput {
     pub note_author: String,
     pub note_id: String,
 }
+
 pub async fn code_execution(user_code_input: Form<UserCodeInput>) -> impl IntoResponse {
     info!("Client wants to run: {:?}", &user_code_input);
     let input = user_code_input.code_string.to_owned();

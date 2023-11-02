@@ -1,15 +1,10 @@
-use tokio::process::Command;
-
 use anyhow::Context;
 use axum::{routing, Router};
 use tower_http::services::ServeDir;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use utils::{
-    html::{code_execution, creator, editor, homepage, notebook, reader, post_static_cell, find_static_cells, find_static_cell_detail},
-    nostr::listen_for_code_executions,
-};
+use utils::html::{code_execution, creator, editor, homepage, notebook, reader, post_static_cell, find_static_cells, find_static_cell_detail, post_notebook_index};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -36,6 +31,7 @@ async fn main() -> anyhow::Result<()> {
     // Microservices to interact with relays
     let api_router = Router::new()
         .route("/notebook", routing::post(notebook))
+        .route("/notebookIndex", routing::post(post_notebook_index))
         .route("/execute", routing::post(code_execution))
         .route("/post-static-cell", routing::post(post_static_cell))
         .route("/find-static-cell", routing::post(find_static_cell_detail))

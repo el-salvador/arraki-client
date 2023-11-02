@@ -84,7 +84,7 @@ impl NotebookCells {
             Self::Active(note) => note.get_id().to_string(),
         }
     }
-    
+
     pub async fn find_single_static_cell(relay: &str, id: &str) -> Result<SignedNote, RelayErrors> {
         info!("Looking for: {}", relay);
         match NostrRelay::new(relay).await {
@@ -125,9 +125,7 @@ impl NotebookCells {
                                 }
                             }
                         }
-                        Err(RelayErrors::SubscriptionError(
-                            "No cell found".to_string(),
-                        ))
+                        Err(RelayErrors::SubscriptionError("No cell found".to_string()))
                     }
                 }
             }
@@ -181,7 +179,7 @@ impl NotebookCells {
                 }
             }
         }
-    } 
+    }
 }
 
 impl Notebook {
@@ -248,15 +246,7 @@ impl Notebook {
         index: &SignedNote,
         relay: &str,
     ) -> Result<Vec<NotebookCells>, RelayErrors> {
-        let note_index: Vec<String> = index
-            .get_tags()
-            .get(0)
-            .unwrap()
-            .get(1..)
-            .unwrap()
-            .iter()
-            .map(|x| x.to_string())
-            .collect();
+        let note_index: Vec<String> = index.get_tags_by_id("i");
         let mut notebook_cells: Vec<NotebookCells> = vec![];
         match NostrRelay::new(relay).await {
             Err(e) => {
@@ -310,26 +300,48 @@ impl Notebook {
         }
     }
 
-    pub fn build_index_note(
-        metadata: &str,
-        note_list: Vec<NotebookCells>,
-        language: &str,
-        packages: Vec<String>,
-    ) -> SignedNote {
+    fn build_index_note(note_list: Vec<String>) -> SignedNote {
         if let Ok(my_nostr_user) = nostro2::userkeys::UserKeys::new(MY_KEY) {
-            let mut note = Note::new(my_nostr_user.get_public_key(), 400, metadata);
+            let mut note = Note::new(
+                my_nostr_user.get_public_key(),
+                400,
+                &format!(
+                    "Notebook Published By: {:?}",
+                    my_nostr_user.get_public_key()
+                ),
+            );
             for cell in note_list {
-                note.tag_note("I", &cell.extract_id());
+                note.tag_note("i", &cell);
             }
-            note.tag_note("l", language);
-            for package in packages {
-                note.tag_note("c", &package);
-            }
+            note.tag_note("l", "rust");
             let signed_note = my_nostr_user.sign_nostr_event(note);
             info!("Code Note: {}", to_string_pretty(&signed_note).unwrap());
             signed_note
         } else {
             panic!("Error creating user keys");
+        }
+    }
+
+    pub async fn post_index_note(note_list: Vec<String>, relay: &str) -> Result<(), RelayErrors> {
+        let note = Self::build_index_note(note_list);
+        match NostrRelay::new(relay).await {
+            Err(e) => {
+                info!("{:?}", e);
+                return Err(e);
+            }
+            Ok(relay_connection) => match relay_connection.send_note(note).await {
+                Err(e) => {
+                    info!("{:?}", e);
+                    return Err(e);
+                }
+                Ok(_) => {
+                    info!("Sent notebook index");
+                    match relay_connection.close().await {
+                        Ok(_) => return Ok(()),
+                        Err(e) => return Err(e),
+                    }
+                }
+            },
         }
     }
 }
@@ -448,8 +460,7 @@ pub async fn post_notebook_cell(
 fn create_code_note(code: &str) -> SignedNote {
     if let Ok(my_nostr_user) = nostro2::userkeys::UserKeys::new(MY_KEY) {
         let mut note = Note::new(my_nostr_user.get_public_key(), 300, code);
-        note.tag_note("N", "notebook");
-        note.tag_note("i", "cellId");
+        note.tag_note("l", "rust");
         let signed_note = my_nostr_user.sign_nostr_event(note);
         info!("Code Note: {}", to_string_pretty(&signed_note).unwrap());
         signed_note
@@ -466,7 +477,8 @@ pub async fn post_code_and_wait_for_execution(code: &str) -> Option<SignedNote> 
         .await
         .expect("Error");
     let filter: Value = json!({
-        "kinds": [17421],
+        "kinds": [301],
+        "#a": [note.get_id()],
     });
     relay_connection.subscribe(filter).await.unwrap();
     relay_connection
@@ -490,6 +502,7 @@ pub async fn post_code_and_wait_for_execution(code: &str) -> Option<SignedNote> 
             }
             RelayEvents::OK(_event, id, _success, _notice) => {
                 info!("OK: {}", id);
+
                 continue;
             }
             RelayEvents::NOTICE(_event, notice) => {
