@@ -11,7 +11,6 @@
                     </div>
                     <p>Posted on: {{ cell.get_cell_timestamp() }}</p>
 
-                    <input class="hidden" data-author="author" value{{ cell.get_notebook_pubkey()}}></input>
                     <input class="hidden" data-id="id" value={{ cell.get_cell_id()}}></input>
                 </button>
                 <div id="execution_response"></div>
@@ -33,8 +32,9 @@
                     class="w-full p-1 text-sm font-medium text-moon transition bg-confirm hover:text-dark hover:bg-light">
 
                     <input class="hidden" id="monacoContent" name="code_string"></input>
-                    <input class="hidden" id="note_author" name="note_author"></input>
-                    <input class="hidden" id="note_id" name="note_id"></input>
+                    <input class="hidden" id="privateKeyInput" name="private_key"></input>
+                    <input class="hidden" id="noteId" name="note_id"></input>
+                    <input class="hidden" id="relay" name="relay"></input>
                     <h3>
                         RUN
                     </h3>
@@ -84,16 +84,17 @@
 <script>
     function setNoteData(event) {
         const clickedButton = event.currentTarget;
-        const author = clickedButton.querySelector("[data-author]").value;
         const id = clickedButton.querySelector("[data-id]").value;
 
-        const note_author = document.getElementById("note_author");
-        const note_id = document.getElementById("note_id");
+        const noteId = document.getElementById("noteId");
+        const privateKeyInput = document.getElementById("privateKeyInput");
+        const relay = document.getElementById("relay");
 
-        note_author.value = author;
-        note_id.value = id;
-
+        noteId.value = id;
+        privateKeyInput.value = privateKey;
+        relay.value = relayUrlGlobal;
         // Remove 'selected' id from any button that has it
+
         const previouslySelected = document.getElementById('selected');
         if (previouslySelected) {
             previouslySelected.removeAttribute('id');

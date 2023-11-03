@@ -1,7 +1,6 @@
 use nostro2::{
     notes::{Note, SignedNote},
     relays::{NostrRelay, RelayErrors, RelayEvents},
-    utils::get_unix_timestamp,
 };
 use serde_json::{json, to_string_pretty, Value};
 use tracing::log::info;
@@ -37,15 +36,15 @@ impl NotebookCells {
             Self::Active(note) => note.get_pubkey().to_string(),
         }
     }
-    pub fn get_cell_timestamp(&self) -> String {
+    pub fn get_cell_timestamp(&self) -> u64{
         match self {
-            Self::Static(note) => note.get_created_at().to_string(),
-            Self::Active(note) => note.get_created_at().to_string(),
+            Self::Static(note) => note.get_created_at(),
+            Self::Active(note) => note.get_created_at(),
         }
     }
 
-    pub async fn create_static_cell(markdown: &str, relay: &str) -> Result<(), RelayErrors> {
-        if let Ok(my_nostr_user) = nostro2::userkeys::UserKeys::new(MY_KEY) {
+    pub async fn create_static_cell(markdown: &str, relay: &str, private_key: &str) -> Result<(), RelayErrors> {
+        if let Ok(my_nostr_user) = nostro2::userkeys::UserKeys::new(private_key) {
             let note = Note::new(my_nostr_user.get_public_key(), 401, markdown);
             let signed_note = my_nostr_user.sign_nostr_event(note);
             info!("Code Note: {}", to_string_pretty(&signed_note).unwrap());
@@ -75,8 +74,8 @@ impl NotebookCells {
         }
     }
 
-    pub async fn create_active_cell(code: &str, relay: &str) -> Result<(), RelayErrors> {
-        if let Ok(my_nostr_user) = nostro2::userkeys::UserKeys::new(MY_KEY) {
+    pub async fn create_active_cell(code: &str, relay: &str, private_key: &str) -> Result<(), RelayErrors> {
+        if let Ok(my_nostr_user) = nostro2::userkeys::UserKeys::new(private_key) {
             let note = Note::new(my_nostr_user.get_public_key(), 402, code);
             let signed_note = my_nostr_user.sign_nostr_event(note);
             info!("Code Note: {}", to_string_pretty(&signed_note).unwrap());
@@ -152,8 +151,7 @@ impl NotebookCells {
             }
         }
     }
-    pub async fn find_static_cells(relay: &str) -> Result<Vec<SignedNote>, RelayErrors> {
-        let my_nostr_user = nostro2::userkeys::UserKeys::new(MY_KEY).expect("Error");
+    pub async fn find_static_cells(relay: &str, public_key: &str) -> Result<Vec<SignedNote>, RelayErrors> {
         let mut notebook_cells: Vec<SignedNote> = vec![];
         match NostrRelay::new(relay).await {
             Err(e) => {
@@ -163,7 +161,7 @@ impl NotebookCells {
             Ok(relay_connection) => {
                 let filter: Value = json!({
                     "kinds": [401],
-                    "authors": [my_nostr_user.get_public_key()],
+                    "authors": [public_key],
                     "limit": 25,
                 });
                 info!("Filter: {}", filter);
@@ -326,8 +324,8 @@ impl Notebook {
         }
     }
 
-    fn build_index_note(note_list: Vec<String>) -> SignedNote {
-        if let Ok(my_nostr_user) = nostro2::userkeys::UserKeys::new(MY_KEY) {
+    fn build_index_note(note_list: Vec<String>, private_key:&str) -> SignedNote {
+        if let Ok(my_nostr_user) = nostro2::userkeys::UserKeys::new(private_key) {
             let mut note = Note::new(
                 my_nostr_user.get_public_key(),
                 400,
@@ -348,8 +346,8 @@ impl Notebook {
         }
     }
 
-    pub async fn post_index_note(note_list: Vec<String>, relay: &str) -> Result<(), RelayErrors> {
-        let note = Self::build_index_note(note_list);
+    pub async fn post_index_note(note_list: Vec<String>, relay: &str, private_key:&str) -> Result<(), RelayErrors> {
+        let note = Self::build_index_note(note_list, private_key);
         match NostrRelay::new(relay).await {
             Err(e) => {
                 info!("{:?}", e);
@@ -372,7 +370,6 @@ impl Notebook {
     }
 }
 
-const MY_KEY: &str = "9D075883294B3240F5D7FA669A6FD1F18F8EF63C51EEF3794ED02C602519250B";
 
 pub async fn post_notebook_cell(
     title: &str,
@@ -402,8 +399,8 @@ pub async fn post_notebook_cell(
     }
 }
 
-fn create_code_note(code: &str) -> SignedNote {
-    if let Ok(my_nostr_user) = nostro2::userkeys::UserKeys::new(MY_KEY) {
+fn create_code_note(code: &str, private_key: &str) -> SignedNote {
+    if let Ok(my_nostr_user) = nostro2::userkeys::UserKeys::new(private_key) {
         let mut note = Note::new(my_nostr_user.get_public_key(), 300, code);
         note.tag_note("l", "rust");
         let signed_note = my_nostr_user.sign_nostr_event(note);
@@ -414,11 +411,11 @@ fn create_code_note(code: &str) -> SignedNote {
     }
 }
 
-pub async fn post_code_and_wait_for_execution(code: &str) -> Option<SignedNote> {
+pub async fn post_code_and_wait_for_execution(code: &str,relay: &str, private_key: &str) -> Option<SignedNote> {
     let mut response_note: Option<SignedNote> = None;
-    let note = create_code_note(code);
+    let note = create_code_note(code, private_key);
 
-    let relay_connection = NostrRelay::new("wss://relay.roadrunner.lat")
+    let relay_connection = NostrRelay::new(relay)
         .await
         .expect("Error");
     let filter: Value = json!({
@@ -459,8 +456,8 @@ pub async fn post_code_and_wait_for_execution(code: &str) -> Option<SignedNote> 
     return response_note;
 }
 
-async fn create_code_response(code: &str, respond_to: &str) -> SignedNote {
-    if let Ok(server_nostr_user) = nostro2::userkeys::UserKeys::new(MY_KEY) {
+async fn create_code_response(code: &str, respond_to: &str, private_key: &str) -> SignedNote {
+    if let Ok(server_nostr_user) = nostro2::userkeys::UserKeys::new(private_key) {
         let mut note = Note::new(server_nostr_user.get_public_key(), 17421, code);
         note.tag_note("ex", respond_to);
         note.tag_note("code", "RUST");
@@ -471,8 +468,8 @@ async fn create_code_response(code: &str, respond_to: &str) -> SignedNote {
     }
 }
 
-pub async fn respond_to_code_execution(code: &str, respond_to: &str) {
-    let note = create_code_response(code, respond_to).await;
+pub async fn respond_to_code_execution(code: &str, respond_to: &str, private_key: &str) {
+    let note = create_code_response(code, respond_to, private_key).await;
     let relay = NostrRelay::new("wss://relay.roadrunner.lat")
         .await
         .expect("Error");
@@ -483,36 +480,3 @@ pub async fn respond_to_code_execution(code: &str, respond_to: &str) {
     }
 }
 
-pub async fn listen_for_code_executions() {
-    let relay_connection = NostrRelay::new("wss://relay.roadrunner.lat")
-        .await
-        .expect("Error");
-    let filter: Value = json!({
-        "kinds": [17420],
-        "since": get_unix_timestamp(),
-    });
-
-    relay_connection.subscribe(filter).await.unwrap();
-    info!("Listening for code executions");
-    while let Some(Ok(relay_message)) = relay_connection.read_from_relay().await {
-        match relay_message {
-            RelayEvents::EVENT(_event, _id, signed_note) => {
-                info!("User wants to run code: {}", signed_note.get_content());
-                let content = signed_note.get_content();
-                let respond_to = signed_note.get_pubkey();
-                info!("Content: {}", content);
-                respond_to_code_execution(content, respond_to).await;
-            }
-            RelayEvents::EOSE(_event, notice) => {
-                info!("End of search: {}", notice);
-                continue;
-            }
-            RelayEvents::OK(_event, id, _success, _notice) => {
-                info!("OK: {}", id);
-            }
-            RelayEvents::NOTICE(_event, notice) => {
-                info!("Notice: {}", notice);
-            }
-        }
-    }
-}

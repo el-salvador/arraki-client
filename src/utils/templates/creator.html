@@ -5,7 +5,7 @@
             <div class="col-span-2 h-96">
                 <div id="writer-monaco" name="user_code_input" style="width: 100%; height: 100%"></div>
             </div>
-            <form hx-post="/relay/post-static-cell" hx-target="#didSend" hx-swap="outerHTML">
+            <form hx-post="/relay/postStaticCell" hx-target="#didSend" hx-swap="outerHTML">
                 <input class="hidden" name="relay" value="wss://relay.roadrunner.lat">
                 </input>
                 <textarea class="hidden" id="markdown_input" name="markdown">
@@ -20,14 +20,20 @@
                 Clear
             </button>
         </div>
-        <button class="col-span-1 h-min w-min bg-light border-4 border-moon rounded-lg shadow-lg p-4"
-            hx-get="/relay/get-static-cells" hx-target="#cellList" hx-swap="outerHTML">Refresh</button>
+        <form class="col-span-1 h-min w-min bg-light border-4 border-moon rounded-lg shadow-lg p-4"
+            hx-get="/relay/notebookCells" hx-target="#cellList" hx-swap="outerHTML" hx-trigger="click">
+            <input class="hidden" name="relay" value="wss://relay.roadrunner.lat" />
+            <input class="hidden" name="notebook_pubkey"
+                value="6d2e90bd6a0296ba23b7772a336b88a4920a4e2231656823863c1db3d5976ffe" />
+            <button>Find Cells</button>
+        </form>
         <div id="cellList" class="transition-all"></div>
         <div id="cellDetail" class="h-min w-min flex flex-col bg-light border-4 border-moon rounded-lg shadow-lg p-4">
         </div>
         <div class="h-min w-min flex flex-col bg-light border-4 border-moon rounded-lg shadow-lg p-4">
             <h2>Index List</h2>
-            <form hx-post="/relay/notebookIndex" hx-target="#didSend" hx-swap="outerHTML" hx-ext='json-enc' id="indexCellList">
+            <form hx-post="/relay/notebookIndex" hx-target="#didSend" hx-swap="outerHTML" hx-ext='json-enc'
+                id="indexCellList">
                 <input class="hidden" name="relay" value="wss://relay.roadrunner.lat" />
                 <input class="hidden" id="eventIdsInput" name="index" />
                 <button>Post Index</button>
@@ -88,5 +94,7 @@
     // Attach the function to Monaco Editor's change event
     editor.onDidChangeModelContent(updateTextareaContent);
     updateTextareaContent();
+    
+
 
 </script>

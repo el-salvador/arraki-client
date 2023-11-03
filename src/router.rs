@@ -4,7 +4,7 @@ use tower_http::services::ServeDir;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use utils::html::{code_execution, creator, editor, homepage, reader, post_static_cell, find_static_cells, find_static_cell_detail, post_notebook_index, notebook_from_pubkey, get_user_keypair};
+use utils::html::{code_execution, creator, editor, homepage, reader, post_static_cell, find_static_cell_detail, post_notebook_index, notebook_from_pubkey, get_user_keypair, notebook_cells_from_pubkey};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -31,12 +31,12 @@ async fn main() -> anyhow::Result<()> {
         .route("/userKeys", routing::get(get_user_keypair));
 
     let api_router = Router::new()
-        .route("/notebook", routing::post(notebook_from_pubkey))
+        .route("/notebook", routing::get(notebook_from_pubkey))
+        .route("/notebookCells", routing::get(notebook_cells_from_pubkey))
         .route("/notebookIndex", routing::post(post_notebook_index))
         .route("/execute", routing::post(code_execution))
-        .route("/post-static-cell", routing::post(post_static_cell))
-        .route("/find-static-cell", routing::post(find_static_cell_detail))
-        .route("/get-static-cells", routing::get(find_static_cells));
+        .route("/postNotebookCell", routing::post(post_static_cell))
+        .route("/find-static-cell", routing::post(find_static_cell_detail));
 
     let port = 6900_u16;
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], port));

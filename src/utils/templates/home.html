@@ -24,7 +24,7 @@
                     focus:ring focus:ring-spice">
                 Try the demo now
             </p>
-        </>
+            </>
     </div>
 
     <div class="flex grid grid-cols-2 items-center content-center gap-4">
@@ -44,8 +44,11 @@
             </p>
         </a>
 
-        <div hx-get="/user/userKeys" hx-trigger="load"
+        <div hx-get="/user/userKeys" hx-trigger="click" hx-swap="outerHTML"
             class="w-min h-min rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
+            <h2>Keypairs</h2>
+            <p class="text-moon text-sm">You need a keypair to post to the network.</p> 
+            <p class="text-moon text-sm">Click to get one.</p> 
         </div>
         <!-- 
         <div hx-get="/nav/hosting" hx-target="#content"

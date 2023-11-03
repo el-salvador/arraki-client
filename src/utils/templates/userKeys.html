@@ -1,12 +1,15 @@
-<div hx-get="/user/userKeys" hx-trigger="click" hx-swap="outerHTML">
-    <h2>Your Keypair</h2>
-    <p>You were assigned a keypair on entry. You can use this keypair to sign Nostr messages.</p>
-    <p>Your public key is: <span id="publicKey">{{ public_key[..12] }}</span></p>
-    <p>Your private key was saved to the DOM.</p>
-    <P>Click this box for a new keypair.</p>
+<div id="userKeys"
+    class="w-min h-min rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
+    <p class="text-moon text-sm">Your public key is:</p>
+    <p class="max-w-24 text-moon text-xs break-words select-all">{{ public_key }}</p>
+    <p class="text-moon text-sm">Your private key was saved to the DOM.</p>
+    <button hx-get="/user/userKeys" hx-swap="outerHTML" hx-target="#userKeys" class="text-moon text-sm">Get a new
+        one</button>
 </div>
 
 <script>
-    var privateKey = '{{ private_key }}'; // Replace with your templating syntax
+    var privateKey = '{{ private_key }}';
+    console.log(`KEEP THIS SAFE!`);
+    console.log(`privateKey: ${privateKey}`);
+    // Replace with your templating syntax
 </script>
-

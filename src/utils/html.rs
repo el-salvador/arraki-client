@@ -4,7 +4,7 @@ use axum::{
     debug_handler,
     http::StatusCode,
     response::{Html, IntoResponse, Response},
-    Form, Json,
+    Form, Json, extract::Query,
 };
 use chrono::TimeZone;
 use nostro2::userkeys::UserKeys;
@@ -96,32 +96,6 @@ impl StaticCellResponse {
         dt.to_rfc2822()
     }
 }
-pub async fn find_static_cells() -> impl IntoResponse {
-    info!("Client wants to get static cells");
-    match NotebookCells::find_static_cells("wss://relay.roadrunner.lat").await {
-        Ok(cells) => {
-            let notebook_cells: Vec<StaticCellResponse> = cells
-                .iter()
-                .map(|cell| {
-                    let markdown = cell.get_content().to_string();
-                    let timestamp = cell.get_created_at();
-                    let author = cell.get_pubkey().to_string();
-                    let event_id = cell.get_id().to_string();
-                    StaticCellResponse {
-                        markdown,
-                        timestamp,
-                        author,
-                        event_id,
-                    }
-                })
-                .collect::<Vec<StaticCellResponse>>();
-            HtmlTemplate(StaticCellListTemplate { notebook_cells })
-        }
-        Err(_) => HtmlTemplate(StaticCellListTemplate {
-            notebook_cells: vec![],
-        }),
-    }
-}
 
 #[derive(serde::Deserialize, Debug)]
 pub struct NotebookSearchRequest {
@@ -134,7 +108,7 @@ pub struct NotebookSearchResponse {
     pub notebook_cells: Vec<NotebookCells>,
 }
 
-pub async fn notebook_from_pubkey(form: Form<NotebookSearchRequest>) -> impl IntoResponse {
+pub async fn notebook_from_pubkey(form: Query<NotebookSearchRequest>) -> impl IntoResponse {
     match Notebook::find_notebook(
         &form.relay,
         &form.notebook_pubkey, 
@@ -153,14 +127,43 @@ pub async fn notebook_from_pubkey(form: Form<NotebookSearchRequest>) -> impl Int
     }
 }
 
+pub async fn notebook_cells_from_pubkey(form: Query<NotebookSearchRequest>) -> impl IntoResponse {
+    match Notebook::find_notebook(
+        &form.relay,
+        &form.notebook_pubkey, 
+    )
+    .await
+    {
+        Some(notebook) => HtmlTemplate(StaticCellListTemplate {
+            notebook_cells: notebook.get_notebook_cells().iter_mut().map(|cell| {
+                StaticCellResponse {
+                    markdown: cell.get_markdown_content(),
+                    timestamp: cell.get_cell_timestamp(),
+                    author: cell.get_notebook_pubkey(),
+                    event_id: cell.get_cell_id(),
+                }
+            }).collect(),
+        }),
+        None => {
+            info!("No notebook found.");
+            HtmlTemplate(StaticCellListTemplate {
+                notebook_cells: vec![],
+            })
+        }
+    }
+}
+
+
 #[derive(Deserialize, Debug)]
 pub struct IndexPostRequest {
     pub index: String,
+    pub relay: String,
+    pub private_key: String
 }
 
 pub async fn post_notebook_index(response: Json<IndexPostRequest>) -> impl IntoResponse {
     let index = serde_json::from_str(&response.index.to_owned()).unwrap();
-    match Notebook::post_index_note(index, "wss://relay.roadrunner.lat").await {
+    match Notebook::post_index_note(index, &response.relay, &response.private_key).await {
         Ok(_) => HtmlTemplate(PostNotebookTemplate { posted: true }),
         Err(_) => HtmlTemplate(PostNotebookTemplate { posted: false }),
     }
@@ -169,14 +172,14 @@ pub async fn post_notebook_index(response: Json<IndexPostRequest>) -> impl IntoR
 #[derive(serde::Deserialize, Debug)]
 pub struct UserCodeInput {
     pub code_string: String,
-    pub note_author: String,
-    pub note_id: String,
+    pub private_key: String,
+    pub relay: String,
 }
 
 pub async fn code_execution(user_code_input: Form<UserCodeInput>) -> impl IntoResponse {
     info!("Client wants to run: {:?}", &user_code_input);
     let _input = user_code_input.code_string.to_owned();
-    if let Some(response) = post_code_and_wait_for_execution(&_input).await {
+    if let Some(response) = post_code_and_wait_for_execution(&_input, &user_code_input.relay, &user_code_input.private_key).await {
         let _success = true;
         let code_execution = CodeExecutions {
             _input,
@@ -199,13 +202,14 @@ pub async fn code_execution(user_code_input: Form<UserCodeInput>) -> impl IntoRe
 #[derive(Deserialize, Debug)]
 pub struct StaticCellPost {
     pub markdown: String,
+    pub private_key: String,
     pub relay: String,
 }
 
 #[debug_handler]
 pub async fn post_static_cell(Form(static_cell_post): Form<StaticCellPost>) -> impl IntoResponse {
     info!("Client wants to post: {:?}", &static_cell_post.markdown);
-    match NotebookCells::create_static_cell(&static_cell_post.markdown, &static_cell_post.relay)
+    match NotebookCells::create_static_cell(&static_cell_post.markdown, &static_cell_post.relay, &static_cell_post.private_key)
         .await
     {
         Ok(_) => HtmlTemplate(PostNotebookTemplate { posted: true }),

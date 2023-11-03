@@ -16,7 +16,7 @@
                     Find your Arrakis Notebook across any relay by searching for the pubkey of the notebook.
                 </p>
 
-                <form hx-boost="true" action="/relay/notebook" method="post" class="mt-8 grid grid-cols-6 gap-6">
+                <form hx-boost="true" action="/relay/notebook" method="get" class="mt-8 grid grid-cols-6 gap-6">
                     <div class="relative col-span-6 sm:col-span-3">
                         <label for="notebook_pubkey" class="sr-only">
                             Notebook Pubkey
@@ -34,7 +34,8 @@
                     </div>
                     <div class="relative col-span-6 sm:col-span-3">
                         <label for="author_pubkey" class="sr-only">Relay URL</label>
-                        <input type="text" id="relay_url" name="relay" placeholder="wss://your.favourite.relay" value="wss://relay.roadrunner.lat"
+                        <input type="text" id="relay_url" name="relay" placeholder="wss://your.favourite.relay"
+                            value="wss://relay.roadrunner.lat"
                             class="w-full bg-dark rounded-md border-moon py-2.5 pe-10 shadow-sm sm:text-sm" />
                         <span class="absolute inset-y-0 end-0 grid w-10 place-content-center">
                             <span class="sr-only">Relay URL</span>
@@ -46,7 +47,7 @@
                         </span>
                     </div>
                     <div class="col-span-6 sm:flex sm:items-center sm:gap-4">
-                        <button type="submit"
+                        <button type="submit" id="searchButton"
                             class="mt-8 inline-block rounded bg-spice px-12 py-3 text-sm text-dark font-bold transition hover:bg-light focus:outline-none focus:ring focus:ring-spice">
                             Find Arrakis Notes
                         </button>
@@ -57,3 +58,27 @@
     </div>
 </div>
 <div id="notebook"></div>
+<script>
+    // Declare a global variable to store the relay URL
+    var relayUrlGlobal;
+
+    // Function to handle form submission
+    function handleFormSubmit(event) {
+        // Prevent the default form submission
+
+        // Get the value from the relay URL input field
+        var relayUrl = document.getElementById('relay_url').value;
+
+        // Assign the value to the global variable
+        relayUrlGlobal = relayUrl;
+
+        // For demonstration purposes: Log the global variable to the console
+        console.log('Global Relay URL:', relayUrlGlobal);
+
+        // Continue with any other form submission logic you may have
+        // ...
+    }
+
+    // Add event listener to the form
+    document.getElementById('searchButton').addEventListener('click', handleFormSubmit);
+</script>
