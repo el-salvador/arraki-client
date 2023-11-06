@@ -1,34 +1,52 @@
-<div id="cellList" class="w-fit h-min flex-col space-y-4">
-    <h1 class="w-min text-dark bg-light border-4 border-moon rounded-lg shadow-lg p-4">Static Cells</h1>
-    <div id="noteGrid" class="grid grid-cols-4 gap-2">
+<div id="cellList" class="w-full h-min flex-col my-4">
+    <div id="noteGrid" class="flex flex-col w-full space-y-4">
         {% if !notebook_cells.is_empty() %}
         {% for cell in notebook_cells %}
-        <form hx-post="/relay/find-static-cell" hx-target="#cellDetail" hx-swap="innerHTML" hx-trigger="click"
-            class="bg-light w-min p-2 border-2 border-moon">
-            <input id="{{ cell.event_id }}" class="w-12 truncate select-none bg-light border-0" name="event_id" value="{{ cell.event_id }}">
-            <input class="hidden" name="relay" value="wss://relay.roadrunner.lat">
-        </form>
-        <button onclick="addNoteToIndex('{{ cell.event_id }}')">Add</button>
+        <div class="flex flex-row bg-light items-center rounded border-moon border-2">
+            <form hx-post="/relay/find-static-cell" hx-target="#cellDetail" hx-swap="innerHTML" hx-trigger="click"
+                class="flex-grow">
+                <input id="input_{{ cell.event_id }}" class="flex-grow select-none bg-light border-0" name="event_id"
+                    value="{{ cell.event_id }}" readonly>
+                <input class="hidden" name="relay" value="wss://relay.roadrunner.lat">
+            </form>
+            <label for="checkbox_{{ cell.event_id }}"
+                class="relative h-8 w-14 cursor-pointer [-webkit-tap-highlight-color:_transparent]">
+                <input type="checkbox" id="checkbox_{{ cell.event_id }}" class="peer sr-only"
+                    onclick="toggleNoteInIndex('{{ cell.event_id }}')" />
+                <span class="absolute inset-0 rounded-full bg-dark transition peer-checked:bg-spice"></span>
+                <span
+                    class="absolute inset-y-0 start-0 m-1 h-6 w-6 rounded-full bg-light transition-all peer-checked:start-6"></span>
+            </label>
+        </div>
         {% endfor %}
         {% endif %}
     </div>
 </div>
+
 <script>
+    var selectedEventIds = [];
 
-var selectedEventIds = [];
+    function toggleNoteInIndex(event_id) {
+        var checkBox = document.getElementById("checkbox_" + event_id);
+        var noteIdIndex = selectedEventIds.indexOf(event_id);
 
-function addNoteToIndex(event_id) {
-    var noteId = document.getElementById(event_id);
-    noteId.className = "bg-confirm w-12 truncate select-none border-0";
+        if (checkBox.checked) {
+            // If checkbox is checked and event_id is not in the array, add it
+            if (noteIdIndex === -1) {
+                selectedEventIds.push(event_id);
+            }
+        } else {
+            // If checkbox is unchecked and event_id is in the array, remove it
+            if (noteIdIndex !== -1) {
+                selectedEventIds.splice(noteIdIndex, 1);
+            }
+        }
 
-    // Push the event_id value to the selectedEventIds array
-    selectedEventIds.push(noteId.value);
-    
-    // Update hidden input value with stringified array
-    document.getElementById("eventIdsInput").value = JSON.stringify(selectedEventIds);
+        // Update hidden input value with stringified array, if you have this input somewhere
+        // If you don't have a hidden input for storing the selected event IDs, you can ignore this line
+        document.getElementById("eventIdsInput").value = JSON.stringify(selectedEventIds);
 
-    // Log to console
-    console.log(selectedEventIds);
-}
-
+        // Log to console
+        console.log(selectedEventIds);
+    }
 </script>

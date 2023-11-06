@@ -1,8 +1,20 @@
 <div 
-    id="didSend" 
+    id="sendResponse" 
     class="fixed z-[100] top-0 right-0 
     m-4 p-4 bg-confirm rounded-lg shadow-lg"
     >
     Notebook Cell Sent to Relay: {{ posted }}
 </div>
+
+<script>
+    // Function to remove the element from the DOM
+    function removeDidSend() {
+        var element = document.getElementById('sendResponse');
+        if (element) {
+            element.parentNode.removeChild(element);
+        }
+    }
+
+    setTimeout(removeDidSend, 1600);
+</script>
 

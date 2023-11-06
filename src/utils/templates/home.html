@@ -1,63 +1,83 @@
-<div class="p-4 md:p-8 h-full flex items-center justify-center gap-8">
-    <div class="flex flex-col p-4 text-center md:w-1/2 gap-4 md:gap-8 md:justify-center">
-        <h2 class="text-3xl font-bold sm:text-4xl text-light mb-4">
-            Welcome To The Arrakis Node
-        </h2>
+{% include "sidebar.html" %}
+<div class="flex overflow-hidden w-full h-screen pl-16">
+    <div class="p-4 md:p-8 h-full flex items-center justify-center gap-8">
+        <div class="flex flex-col p-4 text-center md:w-1/2 gap-4 md:gap-8 md:justify-center">
+            <h2 class="text-3xl font-bold sm:text-4xl text-light mb-4">
+                Welcome To The Arrakis Node
+            </h2>
 
-        <p class="text-moon">
-            Share your code tutorials, courses and demos to the Nostr
-            network.
-        </p>
-        <p class="text-moon">
-            Arrakis features interactive coding playgrounds with multiple
-            language support.
-        </p>
-        <p class="text-moon">
-            Not seeing the language or features you need? Contact us for
-            custom endpoints.
-        </p>
+            <p class="text-moon">
+                Share your code tutorials, courses and demos to the Nostr
+                network.
+            </p>
+            <p class="text-moon">
+                Arrakis features interactive coding playgrounds with multiple
+                language support.
+            </p>
+            <p class="text-moon">
+                Not seeing the language or features you need? Contact us for
+                custom endpoints.
+            </p>
 
-        <a href="/nav/demo" hx-boost="true">
-            <p class="w-full font-bold text-sm text-dark font-dune
+            <a href="/nav/demo" hx-boost="true">
+                <p class="w-full font-bold text-sm text-dark font-dune
                     bg-spice justify-center content-center rounded 
                     p-4 transition hover:bg-light focus:outline-none 
                     focus:ring focus:ring-spice">
-                Try the demo now
-            </p>
-            </>
-    </div>
-
-    <div class="flex grid grid-cols-2 items-center content-center gap-4">
-        <a href="/nav/reader" hx-boost="true"
-            class="w-min h-min rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
-            <h2 class="mt-2 font-bold">Reader</h2>
-            <p class="hidden sm:mt-1 sm:block sm:text-sm sm:text-moon">
-                Find a notebook and run your code in the browser.
-            </p>
-        </a>
-
-        <a href="/nav/creator" hx-boost="true"
-            class="w-min h-min rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
-            <h2 class="mt-2 font-bold">Creator</h2>
-            <p class="hidden sm:mt-1 sm:block sm:text-sm sm:text-moon">
-                Build a new notebook and share it to our relay.
-            </p>
-        </a>
-
-        <div hx-get="/user/userKeys" hx-trigger="click" hx-swap="outerHTML"
-            class="w-min h-min rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
-            <h2>Keypairs</h2>
-            <p class="text-moon text-sm">You need a keypair to post to the network.</p> 
-            <p class="text-moon text-sm">Click to get one.</p> 
+                    Try the demo now
+                </p>
+            </a>
         </div>
-        <!-- 
-        <div hx-get="/nav/hosting" hx-target="#content"
-            class="w-min h-min rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
-            <h2 class="mt-2 font-bold">Hosting</h2>
-            <p class="hidden sm:mt-1 sm:block sm:text-sm sm:text-moon">
-                Contact us for custom API and static web hosting.
-            </p>
+
+        <div class="flex flex-col gap-4">
+            <div class="flex gap-4">
+                <a href="/nav/reader" hx-boost="true"
+                    class="flex-1 flex flex-col gap-2 rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
+                    <h2>Reader</h2>
+                    <p class="hidden sm:mt-1 sm:block sm:text-sm sm:text-moon">
+                        Find a notebook and run your code in the browser.
+                    </p>
+                </a>
+
+                <a href="/nav/creator" hx-boost="true"
+                    class="flex-1  flex flex-col gap-2 rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
+                    <h2>Creator</h2>
+                    <p class="hidden sm:mt-1 sm:block sm:text-sm sm:text-moon">
+                        Build a new notebook and share it to our relay.
+                    </p>
+                </a>
+            </div>
+            <div class="flex gap-4">
+                <div
+                    class="flex-1 flex flex-col gap-2 rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
+                    <h2>Login</h2>
+                    <p class="text-moon text-sm">Already Have A Key?</p>
+                    <form hx-post="/user/userKeys" hx-trigger="submit" hx-target="#keypairHolder" hx-swap="outerHTML"
+                        class="relative">
+                        <label for="privateKeyLogin" class="sr-only"> Private Key </label>
+                        <input type="text" name="private_key" id="privateKeyLogin" placeholder="64-bit hex string"
+                            class="w-full bg-dark rounded-md border-moon pe-10 shadow-sm sm:text-sm text-moon" />
+
+                        <!-- Make the svg act as a submit button -->
+                        <button type="submit"
+                            class="absolute inset-y-0 end-0 grid w-10 place-content-center text-gray-500 border-none bg-transparent p-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                class="h-4 w-4">
+                                <path fill-rule="evenodd"
+                                    d="M5.404 14.596A6.5 6.5 0 1116.5 10a1.25 1.25 0 01-2.5 0 4 4 0 10-.571 2.06A2.75 2.75 0 0018 10a8 8 0 10-2.343 5.657.75.75 0 00-1.06-1.06 6.5 6.5 0 01-9.193 0zM10 7.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+
+                <div id="keypairHolder" hx-get="/user/newUserKeys" hx-trigger="click" hx-swap="outerHTML"
+                    class="flex-1 flex flex-col gap-2 rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
+                    <h2>Keypairs</h2>
+                    <p class="text-moon text-sm">You need a keypair to post to the network.</p>
+                    <p class="text-moon text-sm">Click to get one.</p>
+                </div>
+            </div>
         </div>
-        -->
     </div>
 </div>

@@ -4,7 +4,7 @@ use tower_http::services::ServeDir;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use utils::html::{code_execution, creator, editor, homepage, reader, post_static_cell, find_static_cell_detail, post_notebook_index, notebook_from_pubkey, get_user_keypair, notebook_cells_from_pubkey};
+use utils::html::{code_execution, creator, editor, homepage, reader, post_static_cell, find_static_cell_detail, post_notebook_index, notebook_from_pubkey, get_user_keypair, notebook_cells_from_pubkey, check_user_keypair, home};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -22,13 +22,15 @@ async fn main() -> anyhow::Result<()> {
     let src_path = std::env::current_dir().unwrap();
 
     let pages_router = Router::new()
+        .route("/home", routing::get(home))
         .route("/reader", routing::get(reader))
         .route("/creator", routing::get(creator))
         .route("/editor", routing::get(editor))
         .route("/hosting", routing::get(homepage));
 
     let user_router = Router::new()
-        .route("/userKeys", routing::get(get_user_keypair));
+        .route("/newUserKeys", routing::get(get_user_keypair))
+        .route("/userKeys", routing::post(check_user_keypair));
 
     let api_router = Router::new()
         .route("/notebook", routing::get(notebook_from_pubkey))

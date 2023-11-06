@@ -20,6 +20,14 @@ pub async fn homepage() -> impl IntoResponse {
 }
 
 #[derive(Template)]
+#[template(path = "home.html")]
+struct HomeTemplate;
+
+pub async fn home() -> impl IntoResponse {
+    HtmlTemplate(HomeTemplate {})
+}
+
+#[derive(Template)]
 #[template(path = "creator.html")]
 struct CreatorTemplate;
 
@@ -128,23 +136,24 @@ pub async fn notebook_from_pubkey(form: Query<NotebookSearchRequest>) -> impl In
 }
 
 pub async fn notebook_cells_from_pubkey(form: Query<NotebookSearchRequest>) -> impl IntoResponse {
-    match Notebook::find_notebook(
+    
+    match NotebookCells::find_static_cells(
         &form.relay,
         &form.notebook_pubkey, 
     )
     .await
     {
-        Some(notebook) => HtmlTemplate(StaticCellListTemplate {
-            notebook_cells: notebook.get_notebook_cells().iter_mut().map(|cell| {
+        Ok(mut notebook) => HtmlTemplate(StaticCellListTemplate {
+            notebook_cells: notebook.iter_mut().map(|cell| {
                 StaticCellResponse {
-                    markdown: cell.get_markdown_content(),
-                    timestamp: cell.get_cell_timestamp(),
-                    author: cell.get_notebook_pubkey(),
-                    event_id: cell.get_cell_id(),
+                    markdown: cell.get_content().to_string(),
+                    timestamp: cell.get_created_at(),
+                    author: cell.get_pubkey().to_string(),
+                    event_id: cell.get_id().to_string(),
                 }
             }).collect(),
         }),
-        None => {
+        Err(_) => {
             info!("No notebook found.");
             HtmlTemplate(StaticCellListTemplate {
                 notebook_cells: vec![],
@@ -285,6 +294,25 @@ pub async fn get_user_keypair() -> impl IntoResponse {
         }),
     }
 }
+
+#[derive(Deserialize, Debug)]
+pub struct UserKeysCheck {
+    pub private_key: String,
+}
+
+pub async fn check_user_keypair(form: Form<UserKeysCheck>) -> impl IntoResponse {
+    match UserKeys::new(&form.private_key) {
+        Ok(user_keys) => HtmlTemplate(UserKeysTemplate {
+            private_key: form.private_key.to_string(),
+            public_key: user_keys.get_public_key().to_string(),
+        }),
+        Err(_) => HtmlTemplate(UserKeysTemplate{
+            private_key: "No private key found".to_string(),
+            public_key: "No public key found".to_string(),
+        }),
+    }
+}
+
 
         
 pub struct HtmlTemplate<T>(T);

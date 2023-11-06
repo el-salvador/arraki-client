@@ -151,6 +151,7 @@ impl NotebookCells {
             }
         }
     }
+
     pub async fn find_static_cells(relay: &str, public_key: &str) -> Result<Vec<SignedNote>, RelayErrors> {
         let mut notebook_cells: Vec<SignedNote> = vec![];
         match NostrRelay::new(relay).await {

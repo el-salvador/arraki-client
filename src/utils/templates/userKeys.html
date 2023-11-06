@@ -1,9 +1,10 @@
-<div id="userKeys"
-    class="w-min h-min rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
+<div id="keypairHolder"
+    class="flex-1 flex flex-col gap-2 rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
+    <h2>Keypairs</h2>
     <p class="text-moon text-sm">Your public key is:</p>
-    <p class="max-w-24 text-moon text-xs break-words select-all">{{ public_key }}</p>
+    <p class="max-w-48 text-moon text-xs break-all select-all">{{ public_key }}</p>
     <p class="text-moon text-sm">Your private key was saved to the DOM.</p>
-    <button hx-get="/user/userKeys" hx-swap="outerHTML" hx-target="#userKeys" class="text-moon text-sm">Get a new
+    <button hx-get="/user/newUserKeys" hx-swap="outerHTML" hx-target="#keypairHolder" class="text-light text-sm">Get a new
         one</button>
 </div>
 
@@ -11,5 +12,6 @@
     var privateKey = '{{ private_key }}';
     console.log(`KEEP THIS SAFE!`);
     console.log(`privateKey: ${privateKey}`);
+    var publicKey = '{{ public_key }}';
     // Replace with your templating syntax
 </script>

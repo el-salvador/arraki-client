@@ -1,43 +1,48 @@
-<div class="flex overflow-hidden h-screen pl-16">
+<div class="flex overflow-hidden h-screen w-full pl-16">
     {% include "sidebar.html" %}
-    <div id="noteGrid" class="bg-dark h-full w-full p-8 flex flex-wrap gap-12">
-        <div class="float-left grid grid-cols-2 h-fit w-1/3 rounded-lg border-4 border-moon p-1">
-            <div class="col-span-2 h-96">
+    <div id="noteGrid" class="bg-dark h-full w-full p-8 flex flex-row">
+
+        <div class="flex-1 flex flex-col rounded-lg border-4 border-moon p-1">
+            <div class="flex-grow">
                 <div id="writer-monaco" name="user_code_input" style="width: 100%; height: 100%"></div>
             </div>
-            <form hx-post="/relay/postStaticCell" hx-target="#didSend" hx-swap="outerHTML">
-                <input class="hidden" name="relay" value="wss://relay.roadrunner.lat">
-                </input>
-                <textarea class="hidden" id="markdown_input" name="markdown">
-                </textarea>
-                <button class="h-full w-full bg-confirm hover:bg-light hover:text-dark border border-4 border-moon">
-                    Post
+            <div class="flex flex-row">
+                <form class="flex-1" hx-post="/relay/postNotebookCell" hx-target="#didSend" hx-swap="innerHTML">
+                    <input class="hidden" name="relay" value="wss://relay.arrakis.lat" />
+                    <input class="hidden private_key" name="private_key" />
+                    <textarea class="hidden" id="markdown_input" name="markdown"></textarea>
+                    <button class="w-full h-full bg-confirm hover:bg-light hover:text-dark border border-4 border-moon">
+                        Post
+                    </button>
+                </form>
+                <button onclick={clearMonacoEditor()}
+                    class="flex-1 p-2 bg-error hover:bg-light hover:text-dark border border-4 border-moon"
+                    type="button">
+                    Clear
                 </button>
-            </form>
-            <button onclick={clearMonacoEditor()}
-                class="h-full w-full p-2 bg-error hover:bg-light hover:text-dark border border-4 border-moon"
-                type="button">
-                Clear
-            </button>
+            </div>
         </div>
-        <form class="col-span-1 h-min w-min bg-light border-4 border-moon rounded-lg shadow-lg p-4"
-            hx-get="/relay/notebookCells" hx-target="#cellList" hx-swap="outerHTML" hx-trigger="click">
-            <input class="hidden" name="relay" value="wss://relay.roadrunner.lat" />
-            <input class="hidden" name="notebook_pubkey"
-                value="6d2e90bd6a0296ba23b7772a336b88a4920a4e2231656823863c1db3d5976ffe" />
-            <button>Find Cells</button>
-        </form>
-        <div id="cellList" class="transition-all"></div>
-        <div id="cellDetail" class="h-min w-min flex flex-col bg-light border-4 border-moon rounded-lg shadow-lg p-4">
-        </div>
-        <div class="h-min w-min flex flex-col bg-light border-4 border-moon rounded-lg shadow-lg p-4">
-            <h2>Index List</h2>
-            <form hx-post="/relay/notebookIndex" hx-target="#didSend" hx-swap="outerHTML" hx-ext='json-enc'
-                id="indexCellList">
-                <input class="hidden" name="relay" value="wss://relay.roadrunner.lat" />
-                <input class="hidden" id="eventIdsInput" name="index" />
-                <button>Post Index</button>
+        <div class="flex-1 p-4 flex flex-col gap-4">
+            <form class="w-full bg-spice border-4 border-moon rounded-lg shadow-lg p-4" hx-get="/relay/notebookCells"
+                hx-target="#cellList" hx-swap="outerHTML" hx-trigger="click">
+                <input class="hidden" name="relay" value="wss://relay.arrakis.lat" />
+                <input class="hidden public_key" name="notebook_pubkey" />
+                <button>Find Cells</button>
             </form>
+
+            <div id="cellList" class="transition-all"></div>
+
+            <div class="w-full flex flex-col bg-spice border-4 border-moon rounded-lg shadow-lg p-4">
+                <form hx-post="/relay/notebookIndex" hx-target="#didSend" hx-swap="innerHTML" hx-ext='json-enc'
+                    id="indexCellList">
+                    <input class="hidden" name="relay" value="wss://relay.arrakis.lat" />
+                    <input class="hidden" id="eventIdsInput" name="index" />
+                    <input class="hidden private_key" name="private_key" />
+                    <button>Post Index</button>
+                </form>
+            </div>
+        </div>
+        <div id="cellDetail" class="flex-1 bg-light border-4 border-moon rounded-lg shadow-lg p-4">
         </div>
     </div>
 </div>
@@ -85,16 +90,29 @@
     function clearMonacoEditor() {
         editor.setValue("");
     }
+
     function updateTextareaContent() {
         const textarea = document.getElementById("markdown_input");
         textarea.value = editor.getValue();
+    }
+
+    function getKeysFromDOM() {
+        // Assuming privateKey and publicKey are defined and hold the values you want to set.
+        var privateKeys = document.querySelectorAll(".private_key");
+        var publicKeys = document.querySelectorAll(".public_key");
+
+        privateKeys.forEach(function (element) {
+            element.value = privateKey; // This will set the value for each element with class 'private_key'
+        });
+
+        publicKeys.forEach(function (element) {
+            element.value = publicKey; // This will set the value for each element with class 'public_key'
+        });
     }
 
     // Call it once initially to ensure the textarea has the initial content
     // Attach the function to Monaco Editor's change event
     editor.onDidChangeModelContent(updateTextareaContent);
     updateTextareaContent();
-    
-
-
+    getKeysFromDOM();
 </script>
