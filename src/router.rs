@@ -4,7 +4,21 @@ use tower_http::services::ServeDir;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use utils::html::{code_execution, creator, editor, homepage, reader, post_static_cell, find_static_cell_detail, post_notebook_index, notebook_from_pubkey, get_user_keypair, notebook_cells_from_pubkey, check_user_keypair, home};
+use utils::html::{
+    code_execution,
+    creator,
+    editor,
+    homepage,
+    reader,
+    post_static_cell,
+    find_static_cell_detail,
+    post_notebook_index,
+    notebook_from_pubkey,
+    get_user_keypair,
+    notebook_cells_from_pubkey,
+    check_user_keypair,
+    home
+};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

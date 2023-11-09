@@ -1,5 +1,5 @@
 /*
-! tailwindcss v3.3.3 | MIT License | https://tailwindcss.com
+! tailwindcss v3.3.5 | MIT License | https://tailwindcss.com
 */
 
 /*
@@ -820,11 +820,6 @@ select {
   margin: 1rem;
 }
 
-.my-4 {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-
 .mb-4 {
   margin-bottom: 1rem;
 }
@@ -905,11 +900,6 @@ select {
   height: 100%;
 }
 
-.h-min {
-  height: -moz-min-content;
-  height: min-content;
-}
-
 .h-screen {
   height: 100vh;
 }
@@ -977,6 +967,10 @@ select {
   -webkit-user-select: all;
      -moz-user-select: all;
           user-select: all;
+}
+
+.list-inside {
+  list-style-position: inside;
 }
 
 .grid-cols-6 {
@@ -1059,6 +1053,10 @@ select {
 
 .overflow-scroll {
   overflow: scroll;
+}
+
+.break-words {
+  overflow-wrap: break-word;
 }
 
 .break-all {

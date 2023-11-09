@@ -218,7 +218,11 @@ pub struct StaticCellPost {
 #[debug_handler]
 pub async fn post_static_cell(Form(static_cell_post): Form<StaticCellPost>) -> impl IntoResponse {
     info!("Client wants to post: {:?}", &static_cell_post.markdown);
-    match NotebookCells::create_static_cell(&static_cell_post.markdown, &static_cell_post.relay, &static_cell_post.private_key)
+    match NotebookCells::create_static_cell(
+        &static_cell_post.markdown,
+        &static_cell_post.relay,
+        &static_cell_post.private_key
+    )
         .await
     {
         Ok(_) => HtmlTemplate(PostNotebookTemplate { posted: true }),
