@@ -5,6 +5,7 @@ use nostro2::{
 use serde_json::{json, to_string_pretty, Value};
 use tracing::log::info;
 use serde::Deserialize;
+// use regex::Regex;
 
 pub struct Notebook {
     index: SignedNote,
@@ -15,6 +16,17 @@ pub enum NotebookCells {
     Static(SignedNote),
     Active(SignedNote),
 }
+
+// Create a regex function to detect common delimeters for MathJax
+// https://docs.mathjax.org/en/latest/input/tex/delimiters.html
+    // fn detect_mathjax_from_string_to_render(content: String) -> String {
+   // let mathjax_pattern = r"\$(.*?)\$|\$\$(.*?)\$\$|\\\[(.*?)\\\]";
+   // let re = Regex::new(mathjax_pattern).unwrap();
+   // for cap in re.captures_iter(&content) {
+       // if let Some(math)
+   // }
+//
+// }
 
 impl NotebookCells {
 
@@ -318,6 +330,15 @@ impl Notebook {
                                 }
                             }
                         }
+                        let order_map: std::collections::HashMap<_, _> = note_index
+                            .iter()
+                            .enumerate()
+                            .map(|(i, x)| (x, i))
+                            .collect();
+
+                        notebook_cells.sort_by_key(|note| {
+                            order_map.get(&note.get_cell_id())
+                        });
                         Ok(notebook_cells)
                     }
                 }

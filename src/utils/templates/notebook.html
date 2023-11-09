@@ -4,9 +4,9 @@
         <div id="notebook-holder" class="h-4/5 p-8 overflow overflow-scroll">
             <div class="flex flex-col p-4 w-fit gap-8">
                 {% if !notebook_cells.is_empty() %} {% for cell in notebook_cells %}
-                <button class="bg-spice p-4 rounded-2xl w-fit flex flex-col gap-4 text-left 
+                <button class="bg-spice p-2 rounded-2xl w-fit flex flex-col gap-4 text-left 
                     hover:bg-light hover:text-dark transition" onclick="setNoteData(event)">
-                    <div class="remove-all break-all flex flex-col">
+                    <div class="markdown-body rounded p-2 remove-all break-all flex flex-col">
                         {{ cell.get_markdown_content()|markdown }}
                     </div>
                     <p>Posted on: {{ cell.get_cell_timestamp() }}</p>
@@ -62,6 +62,7 @@
             "fn hello_arrakis() {",
             '\tprintln!("Who can destroy a thing, controls it.");',
             "}",
+            "hello_arrakis()"
         ].join("\n"),
         language: "rust",
         theme: "vs-dark",
