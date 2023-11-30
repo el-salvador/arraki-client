@@ -1,5 +1,10 @@
+{% extends "layout.html" %}
+
+{% block title %}Arrakis Notes - Search{% endblock %}
+
+{% block content %}
+
 <div class="flex overflow-hidden h-screen w-full pl-16">
-    {% include "sidebar.html" %}
     <div id="noteGrid" class="bg-dark h-full w-full p-8 flex flex-row">
 
         <div class="flex-1 flex flex-col rounded-lg border-4 border-moon p-1">
@@ -116,3 +121,5 @@
     updateTextareaContent();
     getKeysFromDOM();
 </script>
+{% endblock %}
+```

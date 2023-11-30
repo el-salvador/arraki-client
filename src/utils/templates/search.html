@@ -1,4 +1,9 @@
-{% include "sidebar.html" %}
+{% extends "layout.html" %}
+
+{% block title %}Arrakis Notes - Search{% endblock %}
+
+{% block content %}
+
 <div class="text-moon w-full h-full items-center">
     <div id="search-form" class="bg-white">
         <div class="z-[-10] fixed top-0 right-0 w-full h-2/3 md:h-full">
@@ -82,3 +87,5 @@
     // Add event listener to the form
     document.getElementById('searchButton').addEventListener('click', handleFormSubmit);
 </script>
+{% endblock %}
+```

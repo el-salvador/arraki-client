@@ -11,7 +11,8 @@
         </p>
     </a>
 
-    <button onclick="getPublicKey()" class="group w-1/4 md:w-auto flex flex-col items-center justify-center px-0 gap-1">
+    <a href="/nav/profile" hx-boost="true"
+        class="group w-1/4 md:w-auto flex flex-col items-center justify-center px-0 gap-1">
         <div
             class="relative w-14 h-8 hover-icon group-hover:bg-moon dark:group-hover:bg-light group-hover:bg-opacity-80 dark:group-hover:bg-opacity-80 flex items-center justify-center rounded-2xl">
             <span class="material-symbols-outlined">account_circle</span>
@@ -19,17 +20,8 @@
         <p class="hidden md:block text-xs text-dark tracking-[.0416em] leading-tight">
             Profile
         </p>
-    </button>
-    <script>
-        async function getPublicKey() {
-            try {
-                const key = await window.nostr.getPublicKey();
-                console.log(key); // or do something with the key
-            } catch (error) {
-                console.error("Error fetching public key:", error);
-            }
-        }
-    </script>
+    </a>
+
     <a href="/about" class="group w-1/4 md:w-auto flex flex-col items-center justify-center px-0 gap-1">
         <div
             class="relative w-14 h-8 hover-icon group-hover:bg-moon dark:group-hover:bg-light group-hover:bg-opacity-80 dark:group-hover:bg-opacity-80 flex items-center justify-center rounded-2xl">

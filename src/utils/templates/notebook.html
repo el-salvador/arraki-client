@@ -1,4 +1,9 @@
-{% include "sidebar.html" %}
+{% extends "layout.html" %}
+
+{% block title %}Arrakis Notes - Search{% endblock %}
+
+{% block content %}
+
 <div class="flex overflow-hidden h-screen w-full pl-16">
     <div class="h-full w-full flex flex-col">
         <div id="notebook-holder" class="h-4/5 p-8 overflow overflow-scroll">
@@ -105,3 +110,5 @@
         clickedButton.id = 'selected';
     }
 </script>
+{% endblock %}
+```

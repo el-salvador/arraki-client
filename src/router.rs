@@ -17,7 +17,7 @@ use utils::html::{
     get_user_keypair,
     notebook_cells_from_pubkey,
     check_user_keypair,
-    home
+    home, profile
 };
 
 #[tokio::main]
@@ -38,6 +38,7 @@ async fn main() -> anyhow::Result<()> {
     let pages_router = Router::new()
         .route("/home", routing::get(home))
         .route("/reader", routing::get(reader))
+        .route("/profile", routing::get(profile))
         .route("/creator", routing::get(creator))
         .route("/editor", routing::get(editor))
         .route("/hosting", routing::get(homepage));
@@ -74,6 +75,7 @@ async fn main() -> anyhow::Result<()> {
                 src_path.to_str().unwrap()
             )),
         );
+
     info!("Arrakis service running on {}", addr);
     axum::Server::bind(&addr)
         .serve(router.into_make_service())

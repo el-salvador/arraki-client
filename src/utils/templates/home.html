@@ -1,4 +1,9 @@
-{% include "sidebar.html" %}
+{% extends "layout.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
 <div class="flex overflow-hidden w-full h-screen pl-16">
     <div class="p-4 md:p-8 h-full flex items-center justify-center gap-8">
         <div class="flex flex-col p-4 text-center md:w-1/2 gap-4 md:gap-8 md:justify-center">
@@ -58,7 +63,6 @@
                         <input type="text" name="private_key" id="privateKeyLogin" placeholder="64-bit hex string"
                             class="w-full bg-dark rounded-md border-moon pe-10 shadow-sm sm:text-sm text-moon" />
 
-                        <!-- Make the svg act as a submit button -->
                         <button type="submit"
                             class="absolute inset-y-0 end-0 grid w-10 place-content-center text-gray-500 border-none bg-transparent p-0">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
@@ -70,14 +74,55 @@
                         </button>
                     </form>
                 </div>
-
-                <div id="keypairHolder" hx-get="/user/newUserKeys" hx-trigger="click" hx-swap="outerHTML"
+                <div
                     class="flex-1 flex flex-col gap-2 rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
-                    <h2>Keypairs</h2>
-                    <p class="text-moon text-sm">You need a keypair to post to the network.</p>
-                    <p class="text-moon text-sm">Click to get one.</p>
+                    <h2>NIP-07</h2>
+                    <p class="text-moon text-sm">You can also use your NIP-07 extension.</p>
+                    <div class="flex">
+                        <p class="text-moon text-sm">Log In Now!</p>
+                        <button id="nip07Login"
+                            class=" w-10 place-content-center text-gray-500 border-none bg-transparent p-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                class="h-4 w-4">
+                                <path fill-rule="evenodd"
+                                    d="M5.404 14.596A6.5 6.5 0 1116.5 10a1.25 1.25 0 01-2.5 0 4 4 0 10-.571 2.06A2.75 2.75 0 0018 10a8 8 0 10-2.343 5.657.75.75 0 00-1.06-1.06 6.5 6.5 0 01-9.193 0zM10 7.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
+                <script>
+                    // Wait for the DOM to be fully loaded
+                    document.addEventListener('DOMContentLoaded', (event) => {
+                        // Find the button by its ID
+                        const myButton = document.getElementById('nip07Login');
+
+                        // Add a click event listener to the button
+                        myButton.addEventListener('click', async () => {
+                            try {
+                                // Call the async function and get the public key
+                                const publicKey = await window.nostr.getPublicKey();
+
+                                // Save the results to the DOM as a global variable
+                                window.myAppData = {
+                                    publicKey: publicKey,
+                                    nip07user: true
+                                };
+
+                                // Optional: Log the data or handle it as needed
+                                console.log("PublicKey:", window.myAppData.publicKey);
+                                console.log("NIP07 User:", window.myAppData.nip07user);
+                            } catch (error) {
+                                console.error("Error getting public key:", error);
+                            }
+                        });
+                    });
+                </script>
+
             </div>
+
         </div>
     </div>
 </div>
+{% endblock %}
+```

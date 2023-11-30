@@ -28,6 +28,14 @@ pub async fn home() -> impl IntoResponse {
 }
 
 #[derive(Template)]
+#[template(path = "profile.html")]
+struct ProfileTemplate;
+
+pub async fn profile() -> impl IntoResponse {
+    HtmlTemplate(ProfileTemplate {})
+}
+
+#[derive(Template)]
 #[template(path = "creator.html")]
 struct CreatorTemplate;
 

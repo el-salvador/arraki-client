@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+
+<div class="flex overflow-hidden flex-1 pl-16">
+    <div class="p-4 md:p-8 flex flex-1 items-center justify-around">
+        <div class="flex flex-col gap-8">
+            <h2 class="text-2xl font-bold sm:text-3xl text-light mb-4">
+                User Keys
+            </h2>
+            <div id="keypairHolder" hx-get="/user/newUserKeys" hx-trigger="click" hx-swap="outerHTML"
+                class="flex-1 flex flex-col gap-2 rounded-xl border border-desert p-4 shadow-sm text-light hover:border-spice hover:ring-1 hover:ring-spice focus:outline-none focus:ring">
+                <h2>Keypairs</h2>
+                <p class="text-moon text-sm">You need a keypair to post to the network.</p>
+                <p class="text-moon text-sm">Click to get one.</p>
+            </div>
+        </div>
+        <div>
+            <h2 class="text-2xl font-bold sm:text-3xl text-light mb-4">
+                Relay List
+            </h2>
+        </div>
+    </div>
+</div>
+{% endblock %}
+```
